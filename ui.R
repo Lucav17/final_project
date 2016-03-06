@@ -1,1 +1,7 @@
-shinyUI()
+library(leaflet)
+
+shinyUI(
+  fluidPage(
+    leafletOutput("map")
+  )
+)
