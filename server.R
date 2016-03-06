@@ -17,8 +17,8 @@ shinyServer(function(input, output) {
       addProviderTiles("CartoDB.Positron") %>%
       addCircleMarkers(
         data = live_data(),
-        radius = 10,
-        fillOpacity = 0.5,
+        radius = ~(datetime - min(datetime)) / 300,
+        fillOpacity = ~(datetime - min(datetime)) / (2*(max(datetime) - min(datetime))),
         stroke = FALSE,
         color = 'red',
         lat=~latitude,
