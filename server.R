@@ -2,8 +2,10 @@
 library(leaflet)
 library(jsonlite)
 library(dplyr)
+library(ggmap)
 
 source('scripts/soql.R')
+
 # Retrieve data
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
@@ -21,9 +23,33 @@ shinyServer(function(input, output) {
       flatten()
   })
   
+  lat <- eventReactive(input$search, {
+    geocode(input$address)
+  })
+  
+  lng <- eventReactive(input$search, {
+    geocode(input$address)
+  })
+  
   output$map <- renderLeaflet({
     leaflet() %>%
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addCircleMarkers(
+        data = live_data(),
+        radius = ~(datetime - min(datetime)) / 300,
+        fillOpacity = ~(datetime - min(datetime)) / (2*(max(datetime) - min(datetime))),
+        stroke = FALSE,
+        color = 'red',
+        lat=~latitude,
+        lng=~longitude,
+        layerId=~incident_number
+      )
+  })
+  
+  output$search_map <- renderLeaflet({
+    leaflet() %>%
+      setView(lat = lat(), lng = lng(), zoom = 13) %>%
       addProviderTiles("CartoDB.Positron") %>%
       addCircleMarkers(
         data = live_data(),
