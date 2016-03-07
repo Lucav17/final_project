@@ -2,12 +2,22 @@
 library(leaflet)
 library(jsonlite)
 library(dplyr)
+
+source('scripts/soql.R')
 # Retrieve data
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
 shinyServer(function(input, output) {
   live_data <- reactive({
-    fromJSON(paste0(endpoint_url, "?$where=datetime%20IS%20NOT%20NULL%20AND%20latitude%20IS%20NOT%20NULL%20AND%20longitude%20IS%20NOT%20NULL&$order=datetime%20DESC&$limit=15")) %>% 
+    soql() %>%
+      soql_add_endpoint(endpoint_url) %>% 
+      soql_where("datetime IS NOT NULL") %>%
+      soql_where("latitude IS NOT NULL") %>%
+      soql_where("longitude IS NOT NULL") %>% 
+      soql_order("datetime", desc = TRUE) %>% 
+      soql_limit(15) %>%
+      as.character() %>% 
+      fromJSON() %>% 
       flatten()
   })
   
