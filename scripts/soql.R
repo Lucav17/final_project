@@ -116,16 +116,16 @@ soql_select <- function(soql_list, select_clause) {
   return(soql_list)
 }
 
-soql_order <- function(soql_list, order_clause, desc = FALSE) {
+soql_order <- function(soql_list, column, desc = FALSE) {
   if(class(soql_list) != 'soql') {
     return(NULL)
   }
   
   if(desc) {
-    order_clause <- paste(order_clause, 'DESC')
+    column <- paste(column, 'DESC')
   }
 
-  soql_list$clauses$order <- .concat_clause(soql_list$clauses$order, order_clause)
+  soql_list$clauses$order <- .concat_clause(soql_list$clauses$order, column)
   
   return(soql_list)
 }
