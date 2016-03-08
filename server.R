@@ -9,7 +9,8 @@ library(soql)
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
 data_soql_stump <- soql() %>%
-  soql_add_endpoint(endpoint_url) %>% 
+  soql_add_endpoint(endpoint_url) %>%
+  soql_select("*") %>%
   soql_where("datetime IS NOT NULL") %>%
   soql_where("latitude IS NOT NULL") %>%
   soql_where("longitude IS NOT NULL")
@@ -54,27 +55,54 @@ shinyServer(function(input, output) {
     leafletProxy('recent_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
   })
   
-  lat <- eventReactive(input$search, {
+  lat_lon <- eventReactive(input$search, {
     geocode(input$address)
   })
   
-  lng <- eventReactive(input$search, {
-    geocode(input$address)
+  search_data <- reactive({
+    data_soql_stump %>%
+      soql_where(paste0('within_circle(report_location,', lat_lon()$lat, ', ', lat_lon()$lon,', 1000)')) %>%
+      as.character() %>% 
+      fromJSON() %>%
+      flatten()
   })
   
   output$search_map <- renderLeaflet({
     leaflet() %>%
-      setView(lat = lat(), lng = lng(), zoom = 13) %>%
+      setView(lat = lat_lon()$lat, lng = lat_lon()$lon, zoom = 14) %>%
       addProviderTiles("CartoDB.Positron") %>%
+      addCircles(
+        radius = 1000,
+        color = 'blue',
+        fillOpacity = 0,
+        lat = lat_lon()$lat,
+        lng = lat_lon()$lon
+      ) %>%
       addCircleMarkers(
-        data = recent_data,
-        radius = ~(datetime - min(datetime)) / 300,
-        fillOpacity = ~(datetime - min(datetime)) / (2*(max(datetime) - min(datetime))),
+        data = search_data(),
+        radius = 4,
+        fillOpacity = 0.5,
         stroke = FALSE,
         color = 'red',
         lat=~latitude,
         lng=~longitude,
         layerId=~incident_number
       )
+  })
+  
+  observe({
+    leafletProxy('search_map') %>% clearPopups()
+    clicked <- input$search_map_marker_click
+    if(is.null(clicked)) {
+      return()
+    }
+    clicked_data <- search_data() %>% filter(incident_number == clicked$id)
+    
+    popup_contents <- as.character(tagList(
+      format(as.POSIXlt(clicked_data$datetime, origin="1970-01-01"), format = "%D %r"), tags$br(),
+      clicked_data$address, tags$br(),
+      paste0("Type: ", clicked_data$type)
+    ))
+    leafletProxy('search_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
   })
 })
