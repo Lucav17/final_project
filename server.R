@@ -3,8 +3,8 @@ library(leaflet)
 library(jsonlite)
 library(dplyr)
 library(ggmap)
-
-source('scripts/soql.R')
+# I (Zeb) wrote this package! Code at https://www.github.com/zmbc/soql
+library(soql)
 
 # Retrieve data
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
