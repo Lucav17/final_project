@@ -61,6 +61,7 @@ shinyServer(function(input, output) {
   
   search_data <- reactive({
     data_soql_stump %>%
+      soql_order("datetime", desc = TRUE) %>% 
       soql_where(paste0('within_circle(report_location,', lat_lon()$lat, ', ', lat_lon()$lon,', 1000)')) %>%
       as.character() %>% 
       fromJSON() %>%
