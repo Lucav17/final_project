@@ -23,7 +23,7 @@ shinyUI(
       )
     ),
     tabPanel("Timeline",
-      titlePanel("???")
+      tableOutput('timeline_data')
              
       #sidebarLayout(
         #sidebarPanel(

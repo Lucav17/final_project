@@ -10,7 +10,7 @@ endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
 data_soql_stump <- soql() %>%
   soql_add_endpoint(endpoint_url) %>%
-  soql_select("*") %>%
+  soql_select('*') %>%
   soql_where("datetime IS NOT NULL") %>%
   soql_where("latitude IS NOT NULL") %>%
   soql_where("longitude IS NOT NULL")
@@ -19,8 +19,25 @@ recent_data <- data_soql_stump %>%
   soql_order("datetime", desc = TRUE) %>% 
   soql_limit(15) %>%
   as.character() %>% 
-  fromJSON() %>% 
-  flatten()
+  fromJSON(flatten = TRUE)
+
+timeline_data <- soql() %>%
+    # 2.1 version of the endpoint
+    soql_add_endpoint('https://data.seattle.gov/resource/grwu-wqtk.json') %>%
+    soql_select('date_trunc_ym(datetime) as month, count(datetime)') %>%
+    soql_where('month IS NOT NULL') %>%
+    soql_group('month') %>%
+    soql_order('month') %>%
+    as.character() %>%
+    fromJSON(flatten = TRUE)
+
+heatmap_bins_select <- function(column, min, max, by, as) {
+  bin_mins <- seq(from = min, to = max - by, by = by)
+  case_clause <- paste0(column, '>=', bin_mins, ' AND ', column, '<', bin_mins + by)
+  case_clause <- paste0(case_clause, ', ', (bin_mins - min) / by)
+  case_clause <- paste(case_clause, collapse = ', ')
+  return(paste0('case(', case_clause, ') as ', as))
+}
 
 shinyServer(function(input, output) {
   output$recent_map <- renderLeaflet({
@@ -64,8 +81,7 @@ shinyServer(function(input, output) {
       soql_order("datetime", desc = TRUE) %>% 
       soql_where(paste0('within_circle(report_location,', lat_lon()$lat, ', ', lat_lon()$lon,', 1000)')) %>%
       as.character() %>% 
-      fromJSON() %>%
-      flatten()
+      fromJSON(flatten = TRUE)
   })
   
   output$search_map <- renderLeaflet({
@@ -106,4 +122,6 @@ shinyServer(function(input, output) {
     ))
     leafletProxy('search_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
   })
+
+  output$timeline_data <- renderTable({timeline_data})
 })
