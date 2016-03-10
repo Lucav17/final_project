@@ -138,14 +138,9 @@ shinyServer(function(input, output) {
   })
   
   output$line <- renderPlotly({
-    filter_year <- switch(input$year, 
-                          '2010' = timeline_data %>% filter(year(month) == '2010'),
-                          '2011' = timeline_data %>% filter(year(month) == '2011'),
-                          '2012' = timeline_data %>% filter(year(month) == '2012'),
-                          '2013' = timeline_data %>% filter(year(month) == '2013'),
-                          '2014' = timeline_data %>% filter(year(month) == '2014'),
-                          '2015' = timeline_data %>% filter(year(month) == '2015'),
-                          '2016' = timeline_data %>% filter(year(month) == '2016'))
+    
+    filter_year <- timeline_data %>% filter(year(month) == input$year)
+  
     if(input$type == 'yes') {
     timeline_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
