@@ -7,6 +7,7 @@ library(ggmap)
 library(soql)
 library(shiny)
 library(plotly)
+library(data.table)
 
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
