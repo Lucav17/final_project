@@ -20,37 +20,29 @@ shinyUI(
         )
       )
     ),
-
-    tabPanel("Timeline",
-             
+    tabPanel("Graphs",
       sidebarLayout(
         sidebarPanel(
-          
           radioButtons("type", label = h3("Select Data Type"), selected = 'Entire Data Frame',
                        choices = list("Entire Data Frame" = 'no', "By Year" = 'yes')),
           conditionalPanel(condition = "input.type == 'yes'",
-            selectInput("year", label = h3("Select Year"), selected = '2015',
-                        choices = list("2010" = "2010",
-                           "2011" = "2011",
-                           "2012" = "2012",
-                           "2013" = "2013",
-                           "2014" = "2014",
-                           "2015" = "2015",
-                           "2016" = "2016"))
-            )
-          ),
+                           selectInput("year", label = h3("Select Year"), selected = '2015',
+                                       choices = list("2010" = "2010",
+                                                      "2011" = "2011",
+                                                      "2012" = "2012",
+                                                      "2013" = "2013",
+                                                      "2014" = "2014",
+                                                      "2015" = "2015",
+                                                      "2016" = "2016"))
+          )
+        ),
         mainPanel(
-          plotlyOutput('line')
+          tabsetPanel(
+            tabPanel("Timeline", plotlyOutput('line')),
+            tabPanel("Heatmap", leafletOutput('heatmap'))
+          )
         )
-      ),
-      
-    tabPanel("Graphs",
-      tabsetPanel(
-        tabPanel("Timeline", tableOutput('timeline_data')),
-        tabPanel("Heatmap", leafletOutput('heatmap'))
       )
-
     )
   )
-)
 )

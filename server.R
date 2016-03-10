@@ -43,7 +43,7 @@ heatmap_bins_select <- function(column, min, max, by, as) {
   return(paste0('case(', case_clause, ') as ', as))
 }
 
-heatmap_data <- soql() %>%
+heatmap_soql_stump <- soql() %>%
   # 2.1 version of the endpoint
   soql_add_endpoint('https://data.seattle.gov/resource/grwu-wqtk.json') %>%
   soql_select(heatmap_bins_select('longitude', -123, -122.2, 0.02, 'lon_bin')) %>%
@@ -51,13 +51,7 @@ heatmap_data <- soql() %>%
   soql_group('lon_bin,lat_bin') %>%
   soql_select('count(longitude)') %>%
   soql_where('lon_bin IS NOT NULL') %>%
-  soql_where('lat_bin IS NOT NULL') %>%
-  as.character() %>%
-  fromJSON(flatten = TRUE)
-
-heatmap_data$lon_bin <- as.numeric(heatmap_data$lon_bin)
-heatmap_data$lat_bin <- as.numeric(heatmap_data$lat_bin)
-heatmap_data$count_longitude <- as.numeric(heatmap_data$count_longitude)
+  soql_where('lat_bin IS NOT NULL')
 
 shinyServer(function(input, output) {
   output$recent_map <- renderLeaflet({
@@ -168,19 +162,48 @@ shinyServer(function(input, output) {
                yaxis = list(title = paste("Number of Calls")))
     }
   })
-  output$timeline_data <- renderTable({timeline_data})
+  
+  heatmap_data <- reactive({
+    if(input$type == 'yes') {
+      return(heatmap_soql_stump %>%
+        soql_where(paste0('date_trunc_y(datetime)="', input$year,'-01-01T00:00:00.000"')) %>%
+        as.character() %>%
+        fromJSON(flatten = TRUE) %>%
+        mutate_each(funs(as.numeric), c(lon_bin, lat_bin, count_longitude)))
+    } else {
+      return(heatmap_soql_stump %>%
+        as.character() %>%
+        fromJSON(flatten = TRUE) %>%
+        mutate_each(funs(as.numeric), c(lon_bin, lat_bin, count_longitude)))
+    }
+  })
   
   output$heatmap <-renderLeaflet({
     leaflet() %>%
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
       addProviderTiles("CartoDB.Positron") %>%
       addRectangles(
-        data = heatmap_data,
+        data = heatmap_data(),
         lng1=~lon_bin, lat1=~lat_bin,
         lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
         stroke = FALSE,
         fillColor = 'red',
-        fillOpacity = ~count_longitude * 0.8 / max(count_longitude)
+        fillOpacity = ~count_longitude * 0.8 / max(count_longitude),
+        layerId=~paste0(as.character(lat_bin), ' ', as.character(lon_bin))
       )
+  })
+  
+  observe({
+    leafletProxy('heatmap') %>% clearPopups()
+    clicked <- input$heatmap_shape_click
+    if(is.null(clicked)) {
+      return()
+    }
+    lat_lon_bins <- strsplit(clicked$id, ' ')
+    lat_lon_bins <- lapply(lat_lon_bins, as.numeric)[[1]]
+    clicked_data <- heatmap_data() %>% filter(lat_bin == lat_lon_bins[1], lon_bin == lat_lon_bins[2])
+    
+    popup_contents <- paste0('Calls: ', as.character(clicked_data$count_longitude))
+    leafletProxy('heatmap') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
   })
 })
