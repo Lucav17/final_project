@@ -1,4 +1,5 @@
 library(leaflet)
+library(shiny)
 
 shinyUI(
   navbarPage("Seattle Fire Dept. 9-1-1 Calls",
@@ -26,16 +27,22 @@ shinyUI(
              
       sidebarLayout(
         sidebarPanel(
-          selectInput("year", label = h3("Select Year"), 
-                      choices = list("2010" = "2010",
-                         "2011" = "2011",
-                         "2012" = "2012",
-                         "2013" = "2013",
-                         "2014" = "2014",
-                         "2015" = "2015",
-                         "2016" = "2016"))
-
-        ),
+          
+          radioButtons("type", label = h3("Select Data Type"), selected = 'Entire Data Frame',
+                       choices = list("Entire Data Frame" = 'no', "By Year" = 'yes')),
+          
+          conditionalPanel(condition = "input.type == 'yes'",
+            selectInput("year", label = h3("Select Year"), selected = '2015',
+                        choices = list("2010" = "2010",
+                           "2011" = "2011",
+                           "2012" = "2012",
+                           "2013" = "2013",
+                           "2014" = "2014",
+                           "2015" = "2015",
+                           "2016" = "2016"))
+  
+          )
+          ),
         
         mainPanel(
           #tableOutput('timeline_data')
