@@ -37,10 +37,26 @@ timeline_data <- soql() %>%
 heatmap_bins_select <- function(column, min, max, by, as) {
   bin_mins <- seq(from = min, to = max - by, by = by)
   case_clause <- paste0(column, '>=', bin_mins, ' AND ', column, '<', bin_mins + by)
-  case_clause <- paste0(case_clause, ', ', (bin_mins - min) / by)
-  case_clause <- paste(case_clause, collapse = ', ')
+  case_clause <- paste0(case_clause, ',', bin_mins)
+  case_clause <- paste(case_clause, collapse = ',')
   return(paste0('case(', case_clause, ') as ', as))
 }
+
+heatmap_data <- soql() %>%
+  # 2.1 version of the endpoint
+  soql_add_endpoint('https://data.seattle.gov/resource/grwu-wqtk.json') %>%
+  soql_select(heatmap_bins_select('longitude', -123, -122.2, 0.02, 'lon_bin')) %>%
+  soql_select(heatmap_bins_select('latitude', 47.3, 48, 0.02, 'lat_bin')) %>%
+  soql_group('lon_bin,lat_bin') %>%
+  soql_select('count(longitude)') %>%
+  soql_where('lon_bin IS NOT NULL') %>%
+  soql_where('lat_bin IS NOT NULL') %>%
+  as.character() %>%
+  fromJSON(flatten = TRUE)
+
+heatmap_data$lon_bin <- as.numeric(heatmap_data$lon_bin)
+heatmap_data$lat_bin <- as.numeric(heatmap_data$lat_bin)
+heatmap_data$count_longitude <- as.numeric(heatmap_data$count_longitude)
 
 shinyServer(function(input, output) {
   output$recent_map <- renderLeaflet({
@@ -152,4 +168,18 @@ shinyServer(function(input, output) {
     }
   })
   output$timeline_data <- renderTable({timeline_data})
+  
+  output$heatmap <-renderLeaflet({
+    leaflet() %>%
+      setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addRectangles(
+        data = heatmap_data,
+        lng1=~lon_bin, lat1=~lat_bin,
+        lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
+        stroke = FALSE,
+        fillColor = 'red',
+        fillOpacity = ~count_longitude * 0.8 / max(count_longitude)
+      )
+  })
 })

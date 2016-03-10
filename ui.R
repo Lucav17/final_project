@@ -23,6 +23,7 @@ shinyUI(
         )
       )
     ),
+
     tabPanel("Timeline",
              
       sidebarLayout(
@@ -48,8 +49,15 @@ shinyUI(
           #tableOutput('timeline_data')
           plotlyOutput('line')
         )
-      )
+      ),
       
+    tabPanel("Graphs",
+      tabsetPanel(
+        tabPanel("Timeline", tableOutput('timeline_data')),
+        tabPanel("Heatmap", leafletOutput('heatmap'))
+      )
+
     )
   )
+)
 )
