@@ -183,7 +183,7 @@ shinyServer(function(input, output) {
     
     if(input$type == 'yes') {
       return(chain %>%
-        soql_where(paste0('date_trunc_y(datetime)="', input$year,'-01-01T00:00:00.000"')) %>%
+        soql_where(paste0("date_trunc_y(datetime)='", input$year1,"-01-01T00:00:00.000'")) %>%
         as.character() %>%
         fromJSON(flatten = TRUE) %>%
         mutate_each(funs(as.numeric), c(lon_bin, lat_bin, count_longitude)))
