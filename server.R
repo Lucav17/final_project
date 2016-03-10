@@ -172,14 +172,23 @@ shinyServer(function(input, output) {
   })
   
   heatmap_data <- reactive({
+    chain <- heatmap_soql_stump
+    
+    if('yes' == 'yes') {
+      type_patterns <- types[['boat']]
+      where_statement <- paste0("type like '", type_patterns, "'")
+      where_statement <- paste0(where_statement, collapse = ' OR ')
+      chain <- chain %>% soql_where(where_statement)
+    }
+    
     if(input$type == 'yes') {
-      return(heatmap_soql_stump %>%
+      return(chain %>%
         soql_where(paste0('date_trunc_y(datetime)="', input$year,'-01-01T00:00:00.000"')) %>%
         as.character() %>%
         fromJSON(flatten = TRUE) %>%
         mutate_each(funs(as.numeric), c(lon_bin, lat_bin, count_longitude)))
     } else {
-      return(heatmap_soql_stump %>%
+      return(chain %>%
         as.character() %>%
         fromJSON(flatten = TRUE) %>%
         mutate_each(funs(as.numeric), c(lon_bin, lat_bin, count_longitude)))
