@@ -5,10 +5,7 @@ shinyUI(
   navbarPage("Seattle Fire Dept. 9-1-1 Calls",
     tabPanel("Live Map",
       titlePanel("Recent Calls"),
-      
-      mainPanel(
-        leafletOutput("recent_map")
-      )
+      leafletOutput("recent_map")
     ),
     tabPanel("Search",
       titlePanel("Search by Address"),
