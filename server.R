@@ -152,7 +152,7 @@ shinyServer(function(input, output) {
   
   output$line <- renderPlotly({
     
-    filter_year <- timeline_data %>% filter(year(month) == input$year)
+    filter_year <- timeline_data %>% filter(year(month) == input$year1)
   
     if(input$type == 'yes') {
     timeline_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))

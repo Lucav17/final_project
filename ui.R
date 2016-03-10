@@ -26,7 +26,7 @@ shinyUI(
           radioButtons("type", label = h3("Select Data Type"), selected = 'Entire Data Frame',
                        choices = list("Entire Data Frame" = 'no', "By Year" = 'yes')),
           conditionalPanel(condition = "input.type == 'yes'",
-                           selectInput("year", label = h3("Select Year"), selected = '2015',
+                           selectInput("year1", label = h3("Select Year"), selected = '2015',
                                        choices = list("2010" = "2010",
                                                       "2011" = "2011",
                                                       "2012" = "2012",
