@@ -11,6 +11,19 @@ library(data.table)
 
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
+types <- list(boat = c("Boat%", "Ship%"),
+              medic = "Medic Resp%",
+              mvi = c("Motor Vehicle Accident%", "MVI%"),
+              natural_gas = c("Natural Gas%"),
+              quick_dispatch = "Q%",
+              rescue = "Rescue%",
+              tunnel = "Tunnel%",
+              fire = "%Fire%",
+              explosion = "Explosion%",
+              assault = "Assault%",
+              automatic = "Automatic%"
+              )
+
 data_soql_stump <- soql() %>%
   soql_add_endpoint(endpoint_url) %>%
   soql_select('*') %>%
