@@ -23,7 +23,10 @@ shinyUI(
       )
     ),
     tabPanel("Timeline",
-      tableOutput('timeline_data')
+      tableOutput('timeline_data'),
+      leafletOutput('heatmap'),
+      tags$head(tags$script(src="http://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js")),
+      uiOutput('heat')
              
       #sidebarLayout(
         #sidebarPanel(

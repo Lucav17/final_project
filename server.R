@@ -19,7 +19,8 @@ recent_data <- data_soql_stump %>%
   soql_order("datetime", desc = TRUE) %>% 
   soql_limit(15) %>%
   as.character() %>% 
-  fromJSON(flatten = TRUE)
+  fromJSON() %>%
+  flatten()
 
 timeline_data <- soql() %>%
     # 2.1 version of the endpoint
@@ -29,15 +30,32 @@ timeline_data <- soql() %>%
     soql_group('month') %>%
     soql_order('month') %>%
     as.character() %>%
-    fromJSON(flatten = TRUE)
+    fromJSON() %>%
+    flatten()
 
 heatmap_bins_select <- function(column, min, max, by, as) {
   bin_mins <- seq(from = min, to = max - by, by = by)
   case_clause <- paste0(column, '>=', bin_mins, ' AND ', column, '<', bin_mins + by)
-  case_clause <- paste0(case_clause, ', ', (bin_mins - min) / by)
+  case_clause <- paste0(case_clause, ', ', bin_mins)
   case_clause <- paste(case_clause, collapse = ', ')
   return(paste0('case(', case_clause, ') as ', as))
 }
+
+heatmap_data <- soql() %>%
+  # 2.1 version of the endpoint
+  soql_add_endpoint('https://data.seattle.gov/resource/grwu-wqtk.json') %>%
+  soql_select(heatmap_bins_select('longitude', -123, -122, 0.05, 'lon_bin')) %>%
+  soql_select(heatmap_bins_select('latitude', 47.3, 47.5, 0.05, 'lat_bin')) %>%
+  soql_group('lon_bin,lat_bin') %>%
+  soql_select('count(longitude)') %>%
+  soql_where('lon_bin IS NOT NULL') %>%
+  as.character() %>%
+  fromJSON() %>%
+  flatten()
+
+heatmap_data$lon_bin <- as.numeric(heatmap_data$lon_bin)
+heatmap_data$lat_bin <- as.numeric(heatmap_data$lat_bin)
+heatmap_data$count_longitude <- as.numeric(heatmap_data$count_longitude)
 
 shinyServer(function(input, output) {
   output$recent_map <- renderLeaflet({
@@ -81,7 +99,8 @@ shinyServer(function(input, output) {
       soql_order("datetime", desc = TRUE) %>% 
       soql_where(paste0('within_circle(report_location,', lat_lon()$lat, ', ', lat_lon()$lon,', 1000)')) %>%
       as.character() %>% 
-      fromJSON(flatten = TRUE)
+      fromJSON() %>%
+      flatten()
   })
   
   output$search_map <- renderLeaflet({
@@ -124,4 +143,18 @@ shinyServer(function(input, output) {
   })
 
   output$timeline_data <- renderTable({timeline_data})
+  
+  output$heatmap <-renderLeaflet({
+    leaflet() %>%
+      setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addRectangles(
+        data = heatmap_data,
+        lng1=~lon_bin, lat1=~lat_bin,
+        lng2=~lon_bin + 0.05, lat2=~lat_bin + 0.05,
+        stroke = FALSE,
+        fillColor = 'red',
+        fillOpacity = ~count_longitude / max(count_longitude)
+      )
+  })
 })
