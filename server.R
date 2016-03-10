@@ -5,6 +5,8 @@ library(dplyr)
 library(ggmap)
 # I (Zeb) wrote this package! Code at https://www.github.com/zmbc/soql
 library(soql)
+library(shiny)
+library(plotly)
 
 endpoint_url <- "https://data.seattle.gov/resource/kzjm-xkqj.json"
 
@@ -29,7 +31,8 @@ timeline_data <- soql() %>%
     soql_group('month') %>%
     soql_order('month') %>%
     as.character() %>%
-    fromJSON(flatten = TRUE)
+    fromJSON(flatten = TRUE) %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
+
 
 heatmap_bins_select <- function(column, min, max, by, as) {
   bin_mins <- seq(from = min, to = max - by, by = by)
@@ -121,6 +124,28 @@ shinyServer(function(input, output) {
       paste0("Type: ", clicked_data$type)
     ))
     leafletProxy('search_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
+  })
+  
+  output$line <- renderPlotly({
+    
+    #filter the data based on user input for species
+    filter_year <- switch(input$year, 
+                          '2010' = timeline_data %>% filter(year(month) == '2010'),
+                          '2011' = timeline_data %>% filter(year(month) == '2011'),
+                          '2012' = timeline_data %>% filter(year(month) == '2012'),
+                          '2013' = timeline_data %>% filter(year(month) == '2013'),
+                          '2014' = timeline_data %>% filter(year(month) == '2014'),
+                          '2015' = timeline_data %>% filter(year(month) == '2015'),
+                          '2016' = timeline_data %>% filter(year(month) == '2016'))
+                           
+    #Create the graph that adjusts its labels and shows the area information when hovering over the columns.
+    
+    plot_ly(
+      filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "unemployment") %>% 
+      layout(title = paste('9-1-1 Calls for the Months of', input$year), 
+             xaxis = list(title = paste('Months')),
+             yaxis = list(title = paste("Number of Calls")))
+    
   })
 
   output$timeline_data <- renderTable({timeline_data})

@@ -23,17 +23,26 @@ shinyUI(
       )
     ),
     tabPanel("Timeline",
-      tableOutput('timeline_data')
              
-      #sidebarLayout(
-        #sidebarPanel(
-                 
-        #)
-      #),
-             
-      #mainPanel(
-        #plotlyOutput("timeline")
-      #)
+      sidebarLayout(
+        sidebarPanel(
+          selectInput("year", label = h3("Select Year"), 
+                      choices = list("2010" = "2010",
+                         "2011" = "2011",
+                         "2012" = "2012",
+                         "2013" = "2013",
+                         "2014" = "2014",
+                         "2015" = "2015",
+                         "2016" = "2016"))
+
+        ),
+        
+        mainPanel(
+          #tableOutput('timeline_data')
+          plotlyOutput('line')
+        )
+      )
+      
     )
   )
 )
