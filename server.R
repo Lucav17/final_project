@@ -154,15 +154,15 @@ shinyServer(function(input, output) {
     if(input$type == 'yes') {
     timeline_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
-      filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "unemployment") %>% 
+      filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline") %>% 
       layout(title = paste('9-1-1 Calls for the Months of', input$year), 
              xaxis = list(title = paste('Months')),
              yaxis = list(title = paste("Number of Calls")))
     } else {
       new_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b %Y"))
       plot_ly(
-        new_data, x = new_data$date, y = new_data$count_datetime, name = "unemployment") %>% 
-        layout(title = paste('9-1-1 Calls for the Months of'), 
+        new_data, x = new_data$date, y = new_data$count_datetime, name = "Timeline") %>% 
+        layout(title = paste('9-1-1 Calls for Every Month Of The DataFrame'), 
                xaxis = list(title = paste('Months'), showticklabels = FALSE),
                yaxis = list(title = paste("Number of Calls")))
     }
