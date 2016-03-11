@@ -37,15 +37,13 @@ recent_data <- data_soql_stump %>%
   as.character() %>% 
   fromJSON(flatten = TRUE)
 
-timeline_data <- soql() %>%
+timeline_soql_stump <- soql() %>%
     # 2.1 version of the endpoint
     soql_add_endpoint('https://data.seattle.gov/resource/grwu-wqtk.json') %>%
     soql_select('date_trunc_ym(datetime) as month, count(datetime)') %>%
     soql_where('month IS NOT NULL') %>%
     soql_group('month') %>%
-    soql_order('month') %>%
-    as.character() %>%
-    fromJSON(flatten = TRUE) %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
+    soql_order('month')
 
 
 heatmap_bins_select <- function(column, min, max, by, as) {
@@ -150,19 +148,35 @@ shinyServer(function(input, output) {
     leafletProxy('search_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
   })
   
+  timeline_data <- reactive({
+    chain <- timeline_soql_stump
+    
+    if('yes' == 'yes') {
+      type_patterns <- types[['boat']]
+      where_statement <- paste0("type like '", type_patterns, "'")
+      where_statement <- paste0(where_statement, collapse = ' OR ')
+      chain <- chain %>% soql_where(where_statement)
+    }
+    
+    chain %>%
+      as.character() %>%
+      fromJSON(flatten = TRUE) %>%
+      mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
+  })
+  
   output$line <- renderPlotly({
     
-    filter_year <- timeline_data %>% filter(year(month) == input$year1)
+    filter_year <- timeline_data() %>% filter(year(month) == input$year1)
   
     if(input$type == 'yes') {
-    timeline_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
+    timeline_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
       filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline") %>% 
       layout(title = paste('9-1-1 Calls for the Months of', input$year), 
              xaxis = list(title = paste('Months')),
              yaxis = list(title = paste("Number of Calls")))
     } else {
-      new_data <- timeline_data %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b %Y"))
+      new_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b %Y"))
       plot_ly(
         new_data, x = new_data$date, y = new_data$count_datetime, name = "Timeline") %>% 
         layout(title = paste('9-1-1 Calls for Every Month Of The DataFrame'), 
