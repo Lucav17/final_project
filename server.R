@@ -151,8 +151,8 @@ shinyServer(function(input, output) {
   timeline_data <- reactive({
     chain <- timeline_soql_stump
     
-    if('yes' == 'yes') {
-      type_patterns <- types[['boat']]
+    if('yes' == 'yes') {# input of whether filtering by type goes here
+      type_patterns <- types[['boat']] # input of type goes instead of 'boat'
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
@@ -188,8 +188,8 @@ shinyServer(function(input, output) {
   heatmap_data <- reactive({
     chain <- heatmap_soql_stump
     
-    if('yes' == 'yes') {
-      type_patterns <- types[['boat']]
+    if('yes' == 'yes') { # input of whether filtering by type goes here
+      type_patterns <- types[['boat']] # input of type goes instead of 'boat'
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
