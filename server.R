@@ -60,7 +60,7 @@ heatmap_soql_stump <- soql() %>%
   soql_where('lon_bin IS NOT NULL') %>%
   soql_where('lat_bin IS NOT NULL')
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
   output$recent_map <- renderLeaflet({
     leaflet() %>%
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
@@ -150,6 +150,16 @@ shinyServer(function(input, output) {
       paste0("Type: ", clicked_data$type)
     ))
     leafletProxy('search_map') %>% addPopups(clicked$lng, clicked$lat, popup_contents, layerId = clicked$id)
+  })
+  
+  observe({
+    clicked <- input$search_map_click
+    if(is.null(clicked)) {
+      return()
+    }
+    
+    location = revgeocode(c(clicked$lng, clicked$lat))
+    updateTextInput(session, "address", value = location)
   })
   
   timeline_data <- reactive({
