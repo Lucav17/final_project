@@ -5,11 +5,21 @@ library(plotly)
 shinyUI(
   navbarPage("Seattle Fire Dept. 9-1-1 Calls",
     tabPanel("Live Map",
-      titlePanel("Recent Calls"),
-      
-          sidebarLayout(
-              sidebarPanel(
-                  selectInput("amount", label = h3("Select Number of Most Recent Calls to See"), selected = '15',
+      headerPanel("Live Calls"),
+      sidebarLayout(
+        sidebarPanel(
+          tags$p("This map shows the most recent 9-1-1 calls recieved by the
+                  Seattle fire department. Each red marker represents an event 
+                  that occured just moments ago in and around Seattle. The larger
+                  and brighter the marker, the more recently the event has occured. 
+                  If you click on a marker, a box containing information about the
+                  event that took place will appear. Our data comes from the City of 
+                  Seattle and is updated every 5 mins."),
+          tags$p("Created by @zmbc, @soccerdude2014, @Lucav17, and @LunoA.")),
+        mainPanel(
+          leafletOutput("recent_map"),
+          absolutePanel(top = -100, right = 20, 
+                  selectInput("amount", label = h3("Calls shown:"), selected = '15',
                                  choices = list("15" = '15',
                                                 "25" = '25',
                                                 "50" = '50',
@@ -17,12 +27,11 @@ shinyUI(
                                                 "100" = '100',
                                                 "500" = '500',
                                                 "1000" = '1000'))
-              ),
-              mainPanel(
-                leafletOutput("recent_map")
-              )
-          )
-      ),
+                        ) 
+        )
+      )
+    ),
+    
     tabPanel("Search",
       titlePanel("Search by Address"),
       
@@ -36,7 +45,7 @@ shinyUI(
         )
       )
     ),
-    tabPanel("Graphs",
+    tabPanel("Data",
       sidebarLayout(
         sidebarPanel(
           selectInput("category", label = h3("Select 9-1-1 Call Category"), selected = 'boat',
@@ -71,6 +80,7 @@ shinyUI(
           )
         )
       )
-    )
+    ),
+    theme = "fire.css"
   )
 )

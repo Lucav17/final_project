@@ -133,7 +133,8 @@ shinyServer(function(input, output, session) {
         lat=~latitude,
         lng=~longitude,
         layerId=~incident_number
-      )
+      ) %>%
+      addMarkers(lng = lat_lon()$lon, lat = lat_lon()$lat)
   })
   
   observe({
