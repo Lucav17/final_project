@@ -61,6 +61,14 @@ heatmap_soql_stump <- soql() %>%
   soql_where('lat_bin IS NOT NULL')
 
 shinyServer(function(input, output, session) {
+  recent_data <- reactive({
+    data_soql_stump %>%
+      soql_order("datetime", desc = TRUE) %>% 
+      soql_limit(input$amount) %>%
+      as.character() %>% 
+      fromJSON(flatten = TRUE)
+  })
+  
   output$recent_map <- renderLeaflet({
     leaflet() %>%
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
@@ -105,14 +113,6 @@ shinyServer(function(input, output, session) {
       fromJSON(flatten = TRUE)
   })
   
-  recent_data <- reactive({
-    data_soql_stump %>%
-    soql_order("datetime", desc = TRUE) %>% 
-    soql_limit(input$amount) %>%
-    as.character() %>% 
-    fromJSON(flatten = TRUE)
-  })
-  
   output$search_map <- renderLeaflet({
     leaflet() %>%
       setView(lat = lat_lon()$lat, lng = lat_lon()$lon, zoom = 14) %>%
@@ -134,13 +134,13 @@ shinyServer(function(input, output, session) {
         lng=~longitude,
         layerId=~incident_number
       ) %>%
-      addMarkers(lng = lat_lon()$lon, lat = lat_lon()$lat)
+      addMarkers(lng = lat_lon()$lon, lat = lat_lon()$lat, layerId='center')
   })
   
   observe({
     leafletProxy('search_map') %>% clearPopups()
     clicked <- input$search_map_marker_click
-    if(is.null(clicked)) {
+    if(is.null(clicked) || clicked$id == 'center') {
       return()
     }
     clicked_data <- search_data() %>% filter(incident_number == clicked$id)
