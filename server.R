@@ -78,7 +78,7 @@ shinyServer(function(input, output, session) {
         radius = ~(((datetime - min(datetime)) / (max(datetime) - min(datetime))) * 10) + 1,
         fillOpacity = ~(datetime - (min(datetime)- 900)) / (2*(max(datetime) - min(datetime))),
         stroke = FALSE,
-        color = 'red',
+        color = '#FF4136',
         lat=~latitude,
         lng=~longitude,
         layerId=~incident_number
@@ -129,7 +129,7 @@ shinyServer(function(input, output, session) {
         radius = 4,
         fillOpacity = 0.5,
         stroke = FALSE,
-        color = 'red',
+        color = '#FF4136',
         lat=~latitude,
         lng=~longitude,
         layerId=~incident_number
@@ -186,14 +186,14 @@ shinyServer(function(input, output, session) {
     if(input$filter_by_year == 'yes') {
     timeline_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
-      filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline") %>% 
+      filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline", line = list(color = "#FF4136")) %>% 
       layout(title = paste('9-1-1 Calls for the Months of', input$year1, "For the Category"), 
              xaxis = list(title = paste('Months')),
              yaxis = list(title = paste("Number of Calls")))
     } else {
       new_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b %Y"))
       plot_ly(
-        new_data, x = new_data$date, y = new_data$count_datetime, name = "Timeline") %>% 
+        new_data, x = new_data$date, y = new_data$count_datetime, name = "Timeline", line = list(color = "#FF4136")) %>% 
         layout(title = paste('9-1-1 Calls for Every Month'), 
                xaxis = list(title = paste('Months'), showticklabels = FALSE),
                yaxis = list(title = paste("Number of Calls")))
@@ -233,7 +233,7 @@ shinyServer(function(input, output, session) {
         lng1=~lon_bin, lat1=~lat_bin,
         lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
         stroke = FALSE,
-        fillColor = 'red',
+        fillColor = '#FF4136',
         fillOpacity = ~count_longitude * 0.8 / max(count_longitude),
         layerId=~paste0(as.character(lat_bin), ' ', as.character(lon_bin))
       )
@@ -250,7 +250,7 @@ shinyServer(function(input, output, session) {
         lng1=~lon_bin, lat1=~lat_bin,
         lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
         stroke = FALSE,
-        fillColor = 'red',
+        fillColor = '#FF4136',
         fillOpacity = ~count_longitude * 0.8 / max(count_longitude),
         layerId=~paste0(as.character(lat_bin), ' ', as.character(lon_bin))
       )
