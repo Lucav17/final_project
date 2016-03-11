@@ -10,8 +10,8 @@ shinyUI(
           sidebarLayout(
               sidebarPanel(
                   selectInput("amount", label = h3("Select number of most recent calls to see"), selected = '15',
-                                 choices = list("15" = '5',
-                                                "25" = '20',
+                                 choices = list("15" = '15',
+                                                "25" = '25',
                                                 "50" = '50',
                                                 "75" = '75',
                                                 "100" = '100',
