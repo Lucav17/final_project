@@ -31,11 +31,7 @@ data_soql_stump <- soql() %>%
   soql_where("latitude IS NOT NULL") %>%
   soql_where("longitude IS NOT NULL")
 
-recent_data <- data_soql_stump %>%
-  soql_order("datetime", desc = TRUE) %>% 
-  soql_limit(15) %>%
-  as.character() %>% 
-  fromJSON(flatten = TRUE)
+
 
 timeline_soql_stump <- soql() %>%
     # 2.1 version of the endpoint
@@ -70,9 +66,9 @@ shinyServer(function(input, output) {
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
       addProviderTiles("CartoDB.Positron") %>%
       addCircleMarkers(
-        data = recent_data,
-        radius = ~(datetime - (min(datetime) - 600)) / 300,
-        fillOpacity = ~(datetime - (min(datetime)- 600)) / (2*(max(datetime) - min(datetime))),
+        data = recent_data(),
+        radius = 5,
+        fillOpacity = ~(datetime - (min(datetime)- 900)) / (2*(max(datetime) - min(datetime))),
         stroke = FALSE,
         color = 'red',
         lat=~latitude,
@@ -87,7 +83,7 @@ shinyServer(function(input, output) {
     if(is.null(clicked)) {
       return()
     }
-    clicked_data <- recent_data %>% filter(incident_number == clicked$id)
+    clicked_data <- recent_data() %>% filter(incident_number == clicked$id)
     
     popup_contents <- as.character(tagList(
       format(as.POSIXlt(clicked_data$datetime, origin="1970-01-01"), format = "%D %r"), tags$br(),
@@ -107,6 +103,14 @@ shinyServer(function(input, output) {
       soql_where(paste0('within_circle(report_location,', lat_lon()$lat, ', ', lat_lon()$lon,', 1000)')) %>%
       as.character() %>% 
       fromJSON(flatten = TRUE)
+  })
+  
+  recent_data <- reactive({
+    data_soql_stump %>%
+    soql_order("datetime", desc = TRUE) %>% 
+    soql_limit(input$amount) %>%
+    as.character() %>% 
+    fromJSON(flatten = TRUE)
   })
   
   output$search_map <- renderLeaflet({

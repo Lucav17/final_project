@@ -6,8 +6,23 @@ shinyUI(
   navbarPage("Seattle Fire Dept. 9-1-1 Calls",
     tabPanel("Live Map",
       titlePanel("Recent Calls"),
-      leafletOutput("recent_map")
-    ),
+      
+          sidebarLayout(
+              sidebarPanel(
+                  selectInput("amount", label = h3("Select number of most recent calls to see"), selected = '15',
+                                 choices = list("15" = '5',
+                                                "25" = '20',
+                                                "50" = '50',
+                                                "75" = '75',
+                                                "100" = '100',
+                                                "500" = '500',
+                                                "1000" = '1000'))
+              ),
+              mainPanel(
+                leafletOutput("recent_map")
+              )
+          )
+      ),
     tabPanel("Search",
       titlePanel("Search by Address"),
       
