@@ -152,7 +152,7 @@ shinyServer(function(input, output) {
     chain <- timeline_soql_stump
     
     if('yes' == 'yes') {# input of whether filtering by type goes here
-      type_patterns <- types[['boat']] # input of type goes instead of 'boat'
+      type_patterns <- types[[input$category]] # input of type goes instead of 'boat'
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
@@ -172,7 +172,7 @@ shinyServer(function(input, output) {
     timeline_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
       filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline") %>% 
-      layout(title = paste('9-1-1 Calls for the Months of', input$year), 
+      layout(title = paste('9-1-1 Calls for the Months of', input$year1, "For the Category"), 
              xaxis = list(title = paste('Months')),
              yaxis = list(title = paste("Number of Calls")))
     } else {
@@ -189,7 +189,7 @@ shinyServer(function(input, output) {
     chain <- heatmap_soql_stump
     
     if('yes' == 'yes') { # input of whether filtering by type goes here
-      type_patterns <- types[['boat']] # input of type goes instead of 'boat'
+      type_patterns <- types[[input$category]] # input of type goes instead of 'boat'
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
