@@ -19,7 +19,21 @@ shinyUI(
         mainPanel(
           leafletOutput("recent_map"),
           absolutePanel(right = 20,
-                  sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15)
+                  sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15),
+                  radioButtons("live_filter_by_category", label = h3("Filter by category"), selected = 'All',
+                               choices = list('All' = 'no', 'Individual category' = 'yes')),
+                  conditionalPanel(condition = "input.live_filter_by_category == 'yes'",
+                                   selectInput("live_category", label = h4("Select category"), selected = 'Boat',
+                                               choices = list("Boat" = "boat",
+                                                              "Medic" = "medic",
+                                                              "Natural Gas" = "natural_gas",
+                                                              "Rescue" = "rescue",
+                                                              "Tunnel" = "tunnel",
+                                                              "Fire" = "fire",
+                                                              "Explosion" = "explosion",
+                                                              "Assault" = "assault",
+                                                              "Assault" = "assault"))
+                  )
           )
         )
       )

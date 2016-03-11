@@ -62,7 +62,16 @@ heatmap_soql_stump <- soql() %>%
 
 shinyServer(function(input, output, session) {
   recent_data <- reactive({
-    data_soql_stump %>%
+    
+    chain <- data_soql_stump
+    
+    if(input$live_filter_by_category == 'yes') { 
+      type_patterns <- types[[input$live_category]]
+      where_statement <- paste0("type like '", type_patterns, "'")
+      where_statement <- paste0(where_statement, collapse = ' OR ')
+      chain <- chain %>% soql_where(where_statement)
+    }
+    chain %>%
       soql_order("datetime", desc = TRUE) %>% 
       soql_limit(input$amount) %>%
       as.character() %>% 
