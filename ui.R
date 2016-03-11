@@ -17,7 +17,7 @@ shinyUI(
                   Seattle and is updated every 5 mins."),
           tags$p("Created by @zmbc, @soccerdude2014, @Lucav17, and @LunoA."),
           sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15),
-          radioButtons("live_just_fires", label = h4("Call type"), selected = 'All',
+          radioButtons("live_just_fires", label = h4("Call type"), selected = 'no',
                        choices = list('All' = 'no', 'Fires only' = 'yes'))
         ),
         mainPanel(
@@ -42,10 +42,10 @@ shinyUI(
     tabPanel("Data",
       sidebarLayout(
         sidebarPanel(
-          radioButtons("filter_by_category", label = h3("Filter by category"), selected = 'All',
+          radioButtons("filter_by_category", label = h3("Filter by category"), selected = 'no',
                        choices = list('All' = 'no', 'Individual category' = 'yes')),
           conditionalPanel(condition = "input.filter_by_category == 'yes'",
-            selectInput("category", label = h4("Select category"), selected = 'Boat',
+            selectInput("category", label = h4("Select category"), selected = 'boat',
                        choices = list("Boat" = "boat",
                                       "Medic" = "medic",
                                       "Natural Gas" = "natural_gas",
@@ -56,7 +56,7 @@ shinyUI(
                                       "Assault" = "assault",
                                       "Assault" = "assault"))
           ),
-          radioButtons("filter_by_year", label = h3("Filter by year"), selected = 'All years',
+          radioButtons("filter_by_year", label = h3("Filter by year"), selected = 'no',
                        choices = list("All years" = 'no', "Individual year" = 'yes')),
           
           conditionalPanel(condition = "input.filter_by_year == 'yes'",
