@@ -15,12 +15,13 @@ shinyUI(
                   If you click on a marker, a box containing information about the
                   event that took place will appear. Our data comes from the City of 
                   Seattle and is updated every 5 mins."),
-          tags$p("Created by @zmbc, @soccerdude2014, @Lucav17, and @LunoA.")),
+          tags$p("Created by @zmbc, @soccerdude2014, @Lucav17, and @LunoA."),
+          sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15),
+          radioButtons("live_just_fires", label = h4("Call type"), selected = 'All',
+                       choices = list('All' = 'no', 'Fires only' = 'yes'))
+        ),
         mainPanel(
-          leafletOutput("recent_map"),
-          absolutePanel(right = 20,
-                  sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15)
-          )
+          leafletOutput("recent_map")
         )
       )
     ),
