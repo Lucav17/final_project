@@ -77,6 +77,9 @@ shinyUI(
         )
       )
     ),
+    conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                     tags$img(src = 'loading.gif', class = 'loader')
+    ),
     theme = "fire.css"
   )
 )
