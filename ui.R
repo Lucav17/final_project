@@ -18,16 +18,9 @@ shinyUI(
           tags$p("Created by @zmbc, @soccerdude2014, @Lucav17, and @LunoA.")),
         mainPanel(
           leafletOutput("recent_map"),
-          absolutePanel(top = -100, right = 20, 
-                  selectInput("amount", label = h3("Calls shown:"), selected = '15',
-                                 choices = list("15" = '15',
-                                                "25" = '25',
-                                                "50" = '50',
-                                                "75" = '75',
-                                                "100" = '100',
-                                                "500" = '500',
-                                                "1000" = '1000'))
-                        ) 
+          absolutePanel(right = 20,
+                  sliderInput("amount", label = h4("Calls shown:"), min = 1, max = 1000, value = 15)
+          )
         )
       )
     ),
@@ -48,22 +41,25 @@ shinyUI(
     tabPanel("Data",
       sidebarLayout(
         sidebarPanel(
-          selectInput("category", label = h3("Select 9-1-1 Call Category"), selected = 'boat',
-                      choices = list("Boat" = "boat",
-                                     "Medic" = "medic",
-                                     "Natural Gas" = "natural_gas",
-                                     "Rescue" = "rescue",
-                                     "Tunnel" = "tunnel",
-                                     "Fire" = "fire",
-                                     "Explosion" = "explosion",
-                                     "Assault" = "assault",
-                                     "Assault" = "assault")),
+          radioButtons("filter_by_category", label = h3("Filter by category"), selected = 'All',
+                       choices = list('All' = 'no', 'Individual category' = 'yes')),
+          conditionalPanel(condition = "input.filter_by_category == 'yes'",
+            selectInput("category", label = h4("Select category"), selected = 'Boat',
+                       choices = list("Boat" = "boat",
+                                      "Medic" = "medic",
+                                      "Natural Gas" = "natural_gas",
+                                      "Rescue" = "rescue",
+                                      "Tunnel" = "tunnel",
+                                      "Fire" = "fire",
+                                      "Explosion" = "explosion",
+                                      "Assault" = "assault",
+                                      "Assault" = "assault"))
+          ),
+          radioButtons("filter_by_year", label = h3("Filter by year"), selected = 'All years',
+                       choices = list("All years" = 'no', "Individual year" = 'yes')),
           
-          radioButtons("type", label = h3("Select Data Type"), selected = 'Entire Data Frame',
-                       choices = list("Entire Data Frame" = 'no', "By Year" = 'yes')),
-          
-          conditionalPanel(condition = "input.type == 'yes'",
-                           selectInput("year1", label = h3("Select Year"), selected = '2015',
+          conditionalPanel(condition = "input.filter_by_year == 'yes'",
+                           selectInput("year1", label = h4("Select year"), selected = '2015',
                                        choices = list("2010" = "2010",
                                                       "2011" = "2011",
                                                       "2012" = "2012",

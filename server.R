@@ -166,8 +166,8 @@ shinyServer(function(input, output, session) {
   timeline_data <- reactive({
     chain <- timeline_soql_stump
     
-    if('yes' == 'yes') {# input of whether filtering by type goes here
-      type_patterns <- types[[input$category]] # input of type goes instead of 'boat'
+    if(input$filter_by_category == 'yes') {
+      type_patterns <- types[[input$category]]
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
@@ -183,7 +183,7 @@ shinyServer(function(input, output, session) {
     
     filter_year <- timeline_data() %>% filter(year(month) == input$year1)
   
-    if(input$type == 'yes') {
+    if(input$filter_by_year == 'yes') {
     timeline_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b"))
     plot_ly(
       filter_year, x = filter_year$date, y = filter_year$count_datetime, name = "Timeline") %>% 
@@ -194,7 +194,7 @@ shinyServer(function(input, output, session) {
       new_data <- timeline_data() %>%  mutate(date = format(as.POSIXlt(month, origin="1970-01-01"), format = "%b %Y"))
       plot_ly(
         new_data, x = new_data$date, y = new_data$count_datetime, name = "Timeline") %>% 
-        layout(title = paste('9-1-1 Calls for Every Month Of The DataFrame'), 
+        layout(title = paste('9-1-1 Calls for Every Month'), 
                xaxis = list(title = paste('Months'), showticklabels = FALSE),
                yaxis = list(title = paste("Number of Calls")))
     }
@@ -203,14 +203,14 @@ shinyServer(function(input, output, session) {
   heatmap_data <- reactive({
     chain <- heatmap_soql_stump
     
-    if('yes' == 'yes') { # input of whether filtering by type goes here
-      type_patterns <- types[[input$category]] # input of type goes instead of 'boat'
+    if(input$filter_by_category == 'yes') { 
+      type_patterns <- types[[input$category]]
       where_statement <- paste0("type like '", type_patterns, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
     }
     
-    if(input$type == 'yes') {
+    if(input$filter_by_year == 'yes') {
       return(chain %>%
         soql_where(paste0("date_trunc_y(datetime)='", input$year1,"-01-01T00:00:00.000'")) %>%
         as.character() %>%
@@ -241,7 +241,7 @@ shinyServer(function(input, output, session) {
   
   observe({
     input$year1
-    input$type
+    input$filter_by_year
     
     leafletProxy('heatmap') %>% clearShapes()
     leafletProxy('heatmap') %>%
