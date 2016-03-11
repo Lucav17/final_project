@@ -24,6 +24,41 @@ types <- list(boat = c("Boat%", "Ship%"),
               automatic = "Automatic%"
               )
 
+fire_types <- c(
+  'Auto Fire Alarm',
+  'Automatic Fire Alarm Resd',
+  'Automatic Fire Dist 11',
+  'Bark Fire',
+  'Boat Fire In Marina',
+  'Brush Fire',
+  'Brush Fire Freeway',
+  'Brush Fire Major',
+  'Brush Fire W/Exp.',
+  'Car Fire',
+  'Car Fire Freeway',
+  'Car Fire W/Exp.',
+  'Chimney Fire',
+  'Dumpster Fire',
+  'Dumpster Fire W/Exp.',
+  'Fire House Boat',
+  'Fire in Building',
+  'Fire in Single Family Res',
+  'Fire Response Freeway',
+  'Garage Fire',
+  'Hazardous Material w/Fire',
+  'Monorail Fire on the beam', # wut
+  'Pier Fire',
+  'Rubbish Fire',
+  'Shed Fire',
+  'Tanker Fire',
+  'Train Derailment wFireHzmt',
+  'Tranformer Fire',
+  'Tunnel Fire',
+  'Vault Fire (Electrical)',
+  'WAFA - Automatic Fire Alarm',
+  'WAFAH - Auto Fire Alarm Hazmat'
+)
+
 data_soql_stump <- soql() %>%
   soql_add_endpoint(endpoint_url) %>%
   soql_select('*') %>%
@@ -65,9 +100,8 @@ shinyServer(function(input, output, session) {
     
     chain <- data_soql_stump
     
-    if(input$live_filter_by_category == 'yes') { 
-      type_patterns <- types[[input$live_category]]
-      where_statement <- paste0("type like '", type_patterns, "'")
+    if(input$live_just_fires == 'yes') { 
+      where_statement <- paste0("type = '", fire_types, "'")
       where_statement <- paste0(where_statement, collapse = ' OR ')
       chain <- chain %>% soql_where(where_statement)
     }
