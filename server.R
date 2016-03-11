@@ -269,7 +269,7 @@ shinyServer(function(input, output, session) {
   
   output$heatmap <-renderLeaflet({
     leaflet() %>%
-      setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
+      setView(lat = 47.6097, lng = -122.3331, zoom = 11) %>%
       addProviderTiles("CartoDB.Positron") %>%
       addRectangles(
         data = isolate(heatmap_data()),
