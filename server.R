@@ -214,6 +214,23 @@ shinyServer(function(input, output) {
       setView(lat = 47.6097, lng = -122.3331, zoom = 10) %>%
       addProviderTiles("CartoDB.Positron") %>%
       addRectangles(
+        data = isolate(heatmap_data()),
+        lng1=~lon_bin, lat1=~lat_bin,
+        lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
+        stroke = FALSE,
+        fillColor = 'red',
+        fillOpacity = ~count_longitude * 0.8 / max(count_longitude),
+        layerId=~paste0(as.character(lat_bin), ' ', as.character(lon_bin))
+      )
+  })
+  
+  observe({
+    input$year1
+    input$type
+    
+    leafletProxy('heatmap') %>% clearShapes()
+    leafletProxy('heatmap') %>%
+      addRectangles(
         data = heatmap_data(),
         lng1=~lon_bin, lat1=~lat_bin,
         lng2=~lon_bin + 0.02, lat2=~lat_bin + 0.02,
