@@ -1,7 +1,8 @@
 name: final_project
 account: zmbc
 server: shinyapps.io
-appId: 88465
-bundleId: 393455
+bundleId: 393646
 url: https://zmbc.shinyapps.io/final_project/
-when: 1457729989.2329
+when: 1457748253.18372
+asMultiple: FALSE
+asStatic: FALSE

@@ -137,7 +137,7 @@ shinyServer(function(input, output, session) {
     clicked_data <- recent_data() %>% filter(incident_number == clicked$id)
     
     popup_contents <- as.character(tagList(
-      format(as.POSIXlt(clicked_data$datetime, origin="1970-01-01"), format = "%D %r"), tags$br(),
+      format(as.POSIXlt(clicked_data$datetime, origin="1970-01-01", tz='US/Pacific'), format = "%D %r"), tags$br(),
       clicked_data$address, tags$br(),
       paste0("Type: ", clicked_data$type)
     ))
